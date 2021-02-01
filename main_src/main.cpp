@@ -79,9 +79,14 @@ int main(int argc, char **argv)
 		if(findFace.second != -1)
 		{
 			geometry_msgs::Point32 humanPos;
-        	humanPos.x = objects.object_list.at(findFace.second).position[0];
-        	humanPos.y = objects.object_list.at(findFace.second).position[1];
-        	humanPos.z = objects.object_list.at(findFace.second).position[2];
+//        	humanPos.x = objects.object_list.at(findFace.second).position[0];
+//        	humanPos.y = objects.object_list.at(findFace.second).position[1];
+//        	humanPos.z = objects.object_list.at(findFace.second).position[2];
+			sl::float3 noseData = objects.object_list.at(findFace.second).keypoint[sl::getIdx(sl::BODY_PARTS::NOSE)];
+        	humanPos.x = noseData[0];
+        	humanPos.y = noseData[1];
+        	humanPos.z = noseData[2];
+//			std::cout<<"noseData[0] = "<<noseData[0]<<", noseData[1] = "<<noseData[1]<<", noseData[2] = "<<noseData[2]<<std::endl;
 			MD::getClientPositionPublisher()->publish(humanPos);
 		}
 
