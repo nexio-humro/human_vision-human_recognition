@@ -67,6 +67,20 @@ namespace RT
 			}
 			obj.keypoint_2d = keypoint2;
 			
+            std::vector<sl::float3> keypoint3;
+            for (size_t j = 0; j < objects.objects[i].keypoint_3d.size(); j++)
+            {
+				float x = objects.objects[i].keypoint_3d[j].x;
+				float y = objects.objects[i].keypoint_3d[j].y;
+				float z = objects.objects[i].keypoint_3d[j].z;
+				sl::float3 point;
+				point.x = x;
+				point.y = y;
+				point.z = z;
+				keypoint3.push_back(point);
+			}
+			obj.keypoint = keypoint3;
+			
 			objectsVector.push_back(obj);
 		}
 		
