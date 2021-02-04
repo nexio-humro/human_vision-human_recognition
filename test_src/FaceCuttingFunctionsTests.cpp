@@ -215,7 +215,10 @@ TEST_CASE("extractFace", "[FaceCuttingFunctions]")
     cv::Mat frame = FCF::extractFace(img, rect);
     
 //    std::string result_image_path = SF::getPathToCurrentDirectory() + "../output/frame_cool_cat.jpg";
-//    cv::imwrite(result_image_path, result);
+//    if(result.size() > 0)
+//    {
+//    	cv::imwrite(result_image_path, result);
+//    }
 	
 	SECTION("check few selected points")
 	{	

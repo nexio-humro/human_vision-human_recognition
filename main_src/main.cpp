@@ -40,7 +40,10 @@ int main(int argc, char **argv)
 		{
 			static size_t counter = 0;
 			std::string pathImage = SF::getPathToCurrentDirectory() + "../output/image_" + std::to_string(counter) + ".png";
-			cv::imwrite (pathImage.c_str(), photo);
+			if( (photo.size > 0) && ( (photo.cols > 0) || (photo.rows > 0) ) )
+			{
+				cv::imwrite (pathImage.c_str(), photo);
+			}
 			std::cout<<"-----------------------------"<<std::endl;
 			std::cout<<"counter "<<counter<<" = "<<std::endl;
 			for(size_t i = 0; i < faces.first.size(); i++)
