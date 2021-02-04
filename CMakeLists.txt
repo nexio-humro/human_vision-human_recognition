@@ -36,7 +36,7 @@ include_directories(${OpenCV_INCLUDE_DIRS})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 # write correct path to dlib library
-add_subdirectory(/home/kamil/Dlib/dlib/dlib dlib_build)
+add_subdirectory(/home/sysop/Dlib/dlib/dlib dlib_build)
 
 link_directories(${ZED_LIBRARY_DIR})
 link_directories(${GLEW_LIBRARY_DIRS})
