@@ -4,6 +4,8 @@
 #include <limits>
 #include <KnownFaces.hpp>
 
+/*
+
 TEST_CASE("instance()", "[KnownFaces]")
 {	
 //	KnownFaces::instance()
@@ -167,3 +169,5 @@ TEST_CASE("clear", "[KnownFaces]")
 	
 	REQUIRE(KnownFaces::instance()->getFacesAmount() == 0);
 }
+
+*/

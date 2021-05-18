@@ -17,7 +17,7 @@ KnownFaces::KnownFaces()
 	
 }
 
-void KnownFaces::addFace(dlib::matrix<float,0,1> description, int index)
+void KnownFaces::addFace(std::vector<double> description, int index)
 {
 	FaceDescription newFaceDes;
 	newFaceDes._description = description; 
@@ -78,7 +78,7 @@ void KnownFaces::clear()
 	this->_mutex.unlock();
 }
 
-std::pair<double, int> KnownFaces::findBestFaceFitFromFaces(dlib::matrix<float,0,1>& description, double minTreshold)
+std::pair<double, int> KnownFaces::findBestFaceFitFromFaces(std::vector<double>& description, double minTreshold)
 {
 	std::pair<double, int> result;
 	
@@ -89,7 +89,7 @@ std::pair<double, int> KnownFaces::findBestFaceFitFromFaces(dlib::matrix<float,0
 	return result;
 }
 
-std::pair<double, int> KnownFaces::findBestFaceFitFromFaces(std::vector<dlib::matrix<float,0,1>>& descriptionVector, int faceIndex, double minTreshold)
+std::pair<double, int> KnownFaces::findBestFaceFitFromFaces(std::vector<std::vector<double>>& descriptionVector, int faceIndex, double minTreshold)
 {
 	std::pair<double, int> result(KFF::wrongScoreResult, KFF::wrongIndexResult);
 	

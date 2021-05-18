@@ -1,16 +1,13 @@
-#include <sl/Camera.hpp>
-#include <dlib/image_io.h>
-
 #include <SystemFunctions.hpp>
-#include <DlibFrontalFaceDetection.hpp>
-#include <FaceCuttingFunctions.hpp>
-#include <DlibFrontalFaceDetectionPaths.hpp>
 #include <RosTopics.hpp>
 #include <RosServices.hpp>
 #include <MainData.hpp>
+#include <MainFunctions.hpp>
 
 #include "ros/ros.h"
 #include "ros/package.h"
+
+#include <human_vision_exchange/CutFaces.h>
 
 int main(int argc, char **argv) 
 {
@@ -19,75 +16,58 @@ int main(int argc, char **argv)
 	
 	ros::Rate loop_rate(10);
 
-	ros::Subscriber imageGetter = node.subscribe("/zed2/zed_node/left/image_rect_color", 1000, RT::grab_image);
-	ros::Subscriber objectsGetter = node.subscribe("/zed2/zed_node/obj_det/objects", 1000, RT::grab_objects);
+	ros::Subscriber imageGetter = node.subscribe("/human_zed_talker/leftImage", 1000, RT::grab_image);
+	ros::Subscriber objectsGetter = node.subscribe("/human_zed_talker/objects", 1000, ZD::saveObjects);
 	ros::ServiceServer faceVectorService = node.advertiseService("facesVector", RS::processFaceVector);
 	MD::setClientPositionPublisher(node, "clientPosition");
-	
-	std::string path = DFFDP::getPathToDetector();
-	DlibFrontalFaceDetection::instance()->loadModel(path.c_str());
-		
-	FCF::pairFacesImages faces;
+	MD::setCutFacesClient(node, "/human_face_cutter/cutFaces");
+	MD::setFindFaceVectorsClient(node, "/human_dlib_face_recognition/findFaceVectors");
 	
 	while (ros::ok())
 	{
-		sl::Objects objects = ZD::getObjects();
+		std::cout<<std::endl<<"--------------------------------"<<std::endl;
+		human_vision_exchange::Objects objects = ZD::getObjects();
+		std::cout<<"main(): objects.objects.size() = "<<objects.objects.size()<<std::endl;
 		cv::Mat photo = ZD::getImage();
-		faces = FCF::extractAllFaces(photo, objects);
+		std::cout<<"photo: rows = "<<photo.rows<<", cols = "<<photo.cols<<std::endl;
+		int focusedObjectID = MD::getFocusedObjectID();
+		std::cout<<"focusedObjectID = "<<focusedObjectID<<std::endl;
+		human_vision_exchange::FaceDescription focusedObjectFaceDescription = MD::getFocusedFaceDescription();
 		
-		// save images
-		if(true)
+		std::cout<<"counter = "<<MF::counter<<std::endl;
+		
+		// check if tracking object is activated
+		if(MD::getFocusedObjectActivated() == true)
 		{
-			static size_t counter = 0;
-			std::string pathImage = SF::getPathToCurrentDirectory() + "../output/image_" + std::to_string(counter) + ".png";
-			cv::imwrite (pathImage.c_str(), photo);
-			std::cout<<"-----------------------------"<<std::endl;
-			std::cout<<"counter "<<counter<<" = "<<std::endl;
-			for(size_t i = 0; i < faces.first.size(); i++)
+			// chcek if tracking object ID is pressented on scene
+			int focused_ID_Index;
+			focused_ID_Index = MF::findID_WithinObjects(objects, focusedObjectID);
+			
+			std::cout<<"main(): focused_ID_Index = "<<focused_ID_Index<<std::endl;
+			
+			if(focused_ID_Index >= 0)
 			{
-				std::string path = SF::getPathToCurrentDirectory() + "../output/face_" + std::to_string(counter) + "_" + std::to_string(i) + ".png";
-				dlib::save_png (faces.first.at(i), path);
+				// send focused object nose coordinates
+				geometry_msgs::Point32 humanNosePos;
+				humanNosePos = objects.objects[focused_ID_Index].keypoint_2d[static_cast<int>(BODY_PARTS::NOSE)];
+				
+				MD::getClientPositionPublisher()->publish(humanNosePos);
 			}
-			counter++;
-		}
-		
-		std::vector<dlib::matrix<float,0,1>> faceDescriptions;
-		faceDescriptions = DlibFrontalFaceDetection::instance()->computeFaceVectors(faces.first);
-
-		// print face vector
-		if(false)
-		{
-			std::cout<<"face vectors:"<<std::endl;
-			for(size_t i = 0; i < faceDescriptions.size(); i++)
+			else
 			{
-				std::cout<<"face["<<i<<"]: cols = "<<faceDescriptions.at(i).nc()<<", rows = "<<faceDescriptions.at(i).nr()<<", size = "<<faceDescriptions.at(i).size()<<std::endl;
-				for(size_t j = 0; j < faceDescriptions.at(i).size(); j++)
+				// check if tracking faceVector is presseneted on scene
+				std::vector<human_vision_exchange::FaceDescription> faceDescriptionVector;
+				MF::getFaceVectors(objects, photo, faceDescriptionVector);
+				
+				int new_focused_ID_Index;
+				new_focused_ID_Index = MF::findFaceVectorWithinObjects(focusedObjectFaceDescription, faceDescriptionVector);
+				
+				if(new_focused_ID_Index >= 0)
 				{
-					std::cout<<faceDescriptions.at(i)(j)<<std::endl;
-				}
-				std::cout<<"---------------------------"<<std::endl;
+					// change tracking object ID
+					MD::setFocusedObjectID(new_focused_ID_Index);
+				} 
 			}
-		}
-
-		// find face
-		std::pair<double, int> findFace;
-		findFace = KnownFaces::instance()->findBestFaceFitFromFaces(faceDescriptions, 0, 8.0);
-		std::cout<<"face amount = "<<faceDescriptions.size()<<std::endl;
-		std::cout<<"KnownFaces::instance()->getFacesAmount() = "<<KnownFaces::instance()->getFacesAmount()<<std::endl;
-		std::cout<<"findFaee: result = "<<findFace.first<<", index = "<<findFace.second<<std::endl;
-		
-		if(findFace.second != -1)
-		{
-			geometry_msgs::Point32 humanPos;
-//        	humanPos.x = objects.object_list.at(findFace.second).position[0];
-//        	humanPos.y = objects.object_list.at(findFace.second).position[1];
-//        	humanPos.z = objects.object_list.at(findFace.second).position[2];
-			sl::float3 noseData = objects.object_list.at(findFace.second).keypoint[sl::getIdx(sl::BODY_PARTS::NOSE)];
-        	humanPos.x = noseData[0];
-        	humanPos.y = noseData[1];
-        	humanPos.z = noseData[2];
-//			std::cout<<"noseData[0] = "<<noseData[0]<<", noseData[1] = "<<noseData[1]<<", noseData[2] = "<<noseData[2]<<std::endl;
-			MD::getClientPositionPublisher()->publish(humanPos);
 		}
 
 		ros::spinOnce();

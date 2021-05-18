@@ -8,6 +8,7 @@
 #include "human_vision_exchange/FaceVectorReceiver.h"
 
 #include <KnownFaces.hpp>
+#include <MainData.hpp>
 
 namespace RS
 {

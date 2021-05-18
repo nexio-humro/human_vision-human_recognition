@@ -5,8 +5,8 @@ namespace
 	std::mutex zedDataMutex;
 	
 	cv::Mat imageData;
-	sl::Objects objectsData;
-	std::vector<sl::ObjectData> objectsVector;
+	std::vector<human_vision_exchange::Keypoints2d> keypoints2dVector;
+	human_vision_exchange::Objects objectsData;
 }
 
 namespace ZD
@@ -29,37 +29,37 @@ namespace ZD
 		return result;
 	}
 	
-	void saveObjects(sl::Objects& objects)
+	void saveKeypoints2d(std::vector<human_vision_exchange::Keypoints2d>& objects)
+	{
+		zedDataMutex.lock();
+		keypoints2dVector = objects;
+		zedDataMutex.unlock();
+	}
+	
+	std::vector<human_vision_exchange::Keypoints2d> getKeypoints2d()
+	{
+		std::vector<human_vision_exchange::Keypoints2d> result;
+		
+		zedDataMutex.lock();
+		result = keypoints2dVector;
+		zedDataMutex.unlock();
+		
+		return result;
+	}
+	
+	void saveObjects(const human_vision_exchange::Objects& objects)
 	{
 		zedDataMutex.lock();
 		objectsData = objects;
 		zedDataMutex.unlock();
 	}
 	
-	sl::Objects getObjects()
+	human_vision_exchange::Objects getObjects()
 	{
-		sl::Objects result;
+		human_vision_exchange::Objects result;
 		
 		zedDataMutex.lock();
 		result = objectsData;
-		zedDataMutex.unlock();
-		
-		return result;
-	}
-	
-	void saveObjectsData(std::vector<sl::ObjectData>& objects)
-	{
-		zedDataMutex.lock();
-		objectsVector = objects;
-		zedDataMutex.unlock();
-	}
-	
-	std::vector<sl::ObjectData> getObjectsData()
-	{
-		std::vector<sl::ObjectData> result;
-		
-		zedDataMutex.lock();
-		result = objectsVector;
 		zedDataMutex.unlock();
 		
 		return result;
