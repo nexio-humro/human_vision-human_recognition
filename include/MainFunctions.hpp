@@ -22,7 +22,6 @@ namespace MF
 {
 	const double wrongScoreResult = 9999999;
 	const int wrongIndexResult = -1;
-	static size_t counter = 0;
 	
 	void getFaceVectors(human_vision_exchange::Objects& objects, cv::Mat& photo, std::vector<human_vision_exchange::FaceDescription>& faceVectors);
 	int findID_WithinObjects(human_vision_exchange::Objects& objects, size_t objectID);
@@ -31,6 +30,8 @@ namespace MF
 	double lengthBetweenFaceVectors(human_vision_exchange::FaceDescription& firstFaceVector, human_vision_exchange::FaceDescription& secondFaceVector);
 	void saveFaceImages(human_vision_exchange::CutFaces::Response &res);
 	void saveSceneImage(cv::Mat& sceneImage);
+	size_t getCounter();
+	void increaseCounter();
 }
 
 #endif

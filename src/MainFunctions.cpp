@@ -1,5 +1,11 @@
 #include <MainFunctions.hpp>
 
+namespace 
+{
+	std::mutex mutexData;
+	static size_t counter = 0;
+}
+
 namespace MF
 {
 	void getFaceVectors(human_vision_exchange::Objects& objects, cv::Mat& photo, std::vector<human_vision_exchange::FaceDescription>& faceVectors)
@@ -53,6 +59,8 @@ namespace MF
 				}
 			}
 		}
+		
+		MF::increaseCounter();
 	}
 	 
 	int findID_WithinObjects(human_vision_exchange::Objects& objects, size_t objectID)
@@ -61,9 +69,10 @@ namespace MF
 		 
 		 for(int i = 0; i < objects.objects.size(); i++)
 		 {
+			 std::cout<<"MF::findID_WithinObjects(): label_id = "<<objects.objects[i].label_id<<std::endl;
 			 if(objects.objects[i].label_id == objectID)
 			 {
-				 result = objectID;
+				 result = i;
 				 break;
 			 }
 		 }
@@ -117,22 +126,38 @@ namespace MF
 	
 	void saveFaceImages(human_vision_exchange::CutFaces::Response &res)
 	{
-		std::cout<<"saveFaceImages(): faces amount = "<<res.faces.size()<<std::endl;	  
+		std::cout<<"saveFaceImages(): faces amount = "<<res.faces.size()<<", counter "<<MF::getCounter()<<std::endl;	  
 		for(size_t i = 0; i < res.faces.size(); i++)
 		{
-			std::string path = SF::getPathToCurrentDirectory() + "../output/face_" + std::to_string(counter) + "_" + std::to_string(i) + ".png";
+			std::string path = SF::getPathToCurrentDirectory() + "../output/face_" + std::to_string(MF::getCounter()) + "_" + std::to_string(i) + ".png";
 			cv_bridge::CvImagePtr cv_ptr = cv_bridge::toCvCopy(res.faces[i], sensor_msgs::image_encodings::BGR8);
 			cv::Mat cvImage = cv_ptr->image;
 			cv::imwrite(path, cvImage);
 		}
-		 
-		counter++;
 	}
 	
 	void saveSceneImage(cv::Mat& sceneImage)
 	{
 		std::cout<<"saveSceneImage()"<<std::endl;
-		std::string pathImage = SF::getPathToCurrentDirectory() + "../output/image_" + std::to_string(counter) + ".png";
+		std::string pathImage = SF::getPathToCurrentDirectory() + "../output/image_" + std::to_string(MF::getCounter()) + ".png";
 		cv::imwrite (pathImage.c_str(), sceneImage);
+	}
+	
+	size_t getCounter()
+	{
+		size_t result;
+		
+		mutexData.lock();
+		result = counter;
+		mutexData.unlock();
+		
+		return result;
+	}
+	
+	void increaseCounter()
+	{
+		mutexData.lock();
+		counter++;
+		mutexData.unlock();
 	}
 }
