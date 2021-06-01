@@ -27,14 +27,11 @@ int main(int argc, char **argv)
 	{
 		std::cout<<std::endl<<"--------------------------------"<<std::endl;
 		human_vision_exchange::Objects objects = ZD::getObjects();
-		std::cout<<"main(): objects.objects.size() = "<<objects.objects.size()<<std::endl;
 		cv::Mat photo = ZD::getImage();
-		std::cout<<"photo: rows = "<<photo.rows<<", cols = "<<photo.cols<<std::endl;
 		int focusedObjectID = MD::getFocusedObjectID();
-		std::cout<<"focusedObjectID = "<<focusedObjectID<<std::endl;
 		human_vision_exchange::FaceDescription focusedObjectFaceDescription = MD::getFocusedFaceDescription();
 		
-		std::cout<<"counter = "<<MF::counter<<std::endl;
+//		std::cout<<"counter = "<<MF::getCounter()<<std::endl;
 		
 		// check if tracking object is activated
 		if(MD::getFocusedObjectActivated() == true)
@@ -43,15 +40,31 @@ int main(int argc, char **argv)
 			int focused_ID_Index;
 			focused_ID_Index = MF::findID_WithinObjects(objects, focusedObjectID);
 			
-			std::cout<<"main(): focused_ID_Index = "<<focused_ID_Index<<std::endl;
+			// display objects and focused_ID_Index
+			if(false)
+			{
+				std::cout<<"main(): focused_ID_Index = "<<focused_ID_Index<<std::endl;
+				
+				std::cout<<"avaible object indexes: ";
+				for(size_t i = 0; i < objects.objects.size(); i++)
+				{
+					std::cout<<objects.objects[i].label_id<<", ";
+				}
+				std::cout<<std::endl; 
+			}
 			
 			if(focused_ID_Index >= 0)
 			{
 				// send focused object nose coordinates
 				geometry_msgs::Point32 humanNosePos;
-				humanNosePos = objects.objects[focused_ID_Index].keypoint_2d[static_cast<int>(BODY_PARTS::NOSE)];
+				humanNosePos = objects.objects[focused_ID_Index].keypoint_3d[static_cast<int>(BODY_PARTS::NOSE)];
 				
-				MD::getClientPositionPublisher()->publish(humanNosePos);
+//				std::cout<<"humanNosePos = "<<std::endl<<humanNosePos<<std::endl;	
+				
+				if(humanNosePos != geometry_msgs::Point32())
+				{	
+					MD::getClientPositionPublisher()->publish(humanNosePos);
+				}
 			}
 			else
 			{
@@ -59,15 +72,21 @@ int main(int argc, char **argv)
 				std::vector<human_vision_exchange::FaceDescription> faceDescriptionVector;
 				MF::getFaceVectors(objects, photo, faceDescriptionVector);
 				
-				int new_focused_ID_Index;
-				new_focused_ID_Index = MF::findFaceVectorWithinObjects(focusedObjectFaceDescription, faceDescriptionVector);
+				int new_focused_ID_Index = -1;
+//				new_focused_ID_Index = MF::findFaceVectorWithinObjects(focusedObjectFaceDescription, faceDescriptionVector);
+
+				// temporary when face_recognition is not working
+				if( !(objects.objects.size() == 0) )
+				{
+					new_focused_ID_Index = objects.objects[0].label_id;
+				}
 				
 				if(new_focused_ID_Index >= 0)
 				{
 					// change tracking object ID
 					MD::setFocusedObjectID(new_focused_ID_Index);
 				} 
-			}
+			}	
 		}
 
 		ros::spinOnce();
