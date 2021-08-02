@@ -4,11 +4,13 @@ namespace
 {
 	ros::Publisher clientPositionPublisher;
 	ros::ServiceClient findFaceVectorsClient;
+	ros::ServiceClient findFaceVectorsFacenetClient;
 	ros::ServiceClient cutFaceClient;
 	
 	int focusedObjectID = -1;
 	bool focusedObjectActivated = false;
 	human_vision_exchange::FaceDescription focusedFaceVector;
+	human_vision_exchange::FaceDescriptionFacenet focusedFaceVectorFacenet;
 	
 	std::mutex _mutex;
 }
@@ -97,5 +99,34 @@ namespace MD
 		_mutex.lock();
 		focusedFaceVector = faceVector;
 		_mutex.unlock();
+	}
+	
+	// facenet
+	human_vision_exchange::FaceDescriptionFacenet getFocusedFaceDescriptionFacenet()
+	{
+		human_vision_exchange::FaceDescriptionFacenet result;
+		
+		_mutex.lock();
+		result = focusedFaceVectorFacenet;
+		_mutex.unlock();
+		
+		return result;
+	}
+	
+	void setFocusedFaceDescriptionFacenet(const human_vision_exchange::FaceDescriptionFacenet& faceVectorFacenet)
+	{
+		_mutex.lock();
+		focusedFaceVectorFacenet = faceVectorFacenet;
+		_mutex.unlock();
+	}
+	
+	void sendFindFaceVectorsFacenetClientRequest(human_vision_exchange::FindFaceVectorsFacenet& ffv)
+	{
+		findFaceVectorsFacenetClient.call(ffv);
+	}
+	
+	void setFindFaceVectorsFacenetClient(ros::NodeHandle& node, std::string serviceName)
+	{
+		findFaceVectorsFacenetClient = node.serviceClient<human_vision_exchange::FindFaceVectorsFacenet>(serviceName.c_str());
 	}
 }

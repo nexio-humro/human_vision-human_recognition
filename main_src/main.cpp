@@ -18,10 +18,12 @@ int main(int argc, char **argv)
 
 	ros::Subscriber imageGetter = node.subscribe("/human_zed_talker/leftImage", 1000, RT::grab_image);
 	ros::Subscriber objectsGetter = node.subscribe("/human_zed_talker/objects", 1000, ZD::saveObjects);
-	ros::ServiceServer faceVectorService = node.advertiseService("facesVector", RS::processFaceVector);
+//	ros::ServiceServer faceVectorService = node.advertiseService("facesVector", RS::processFaceVector);
+	ros::ServiceServer faceVectorService = node.advertiseService("facesVectorFacenet", RS::processFaceVectorFacenet);
 	MD::setClientPositionPublisher(node, "clientPosition");
 	MD::setCutFacesClient(node, "/human_face_cutter/cutFaces");
-	MD::setFindFaceVectorsClient(node, "/human_dlib_face_recognition/findFaceVectors");
+	MD::setFindFaceVectorsFacenetClient(node, "/human_facenet_face_recognition/findFaceVectors");
+//	MD::setFindFaceVectorsClient(node, "/human_dlib_face_recognition/findFaceVectors");
 	
 	while (ros::ok())
 	{
@@ -29,7 +31,8 @@ int main(int argc, char **argv)
 		human_vision_exchange::Objects objects = ZD::getObjects();
 		cv::Mat photo = ZD::getImage();
 		int focusedObjectID = MD::getFocusedObjectID();
-		human_vision_exchange::FaceDescription focusedObjectFaceDescription = MD::getFocusedFaceDescription();
+//		human_vision_exchange::FaceDescription focusedObjectFaceDescription = MD::getFocusedFaceDescription();
+		human_vision_exchange::FaceDescriptionFacenet focusedObjectFaceDescriptionFacenet = MD::getFocusedFaceDescriptionFacenet();
 		
 //		std::cout<<"counter = "<<MF::getCounter()<<std::endl;
 		
@@ -41,7 +44,7 @@ int main(int argc, char **argv)
 			focused_ID_Index = MF::findID_WithinObjects(objects, focusedObjectID);
 			
 			// display objects and focused_ID_Index
-			if(false)
+			if(true)
 			{
 				std::cout<<"main(): focused_ID_Index = "<<focused_ID_Index<<std::endl;
 				
@@ -69,17 +72,21 @@ int main(int argc, char **argv)
 			else
 			{
 				// check if tracking faceVector is presseneted on scene
-				std::vector<human_vision_exchange::FaceDescription> faceDescriptionVector;
-				MF::getFaceVectors(objects, photo, faceDescriptionVector);
+//				std::vector<human_vision_exchange::FaceDescription> faceDescriptionVector;
+//				MF::getFaceVectors(objects, photo, faceDescriptionVector);
+				
+				std::vector<human_vision_exchange::FaceDescriptionFacenet> faceDescriptionVectorFacenet;
+				MF::getFaceVectorsFacenet(objects, photo, faceDescriptionVectorFacenet);
 				
 				int new_focused_ID_Index = -1;
 //				new_focused_ID_Index = MF::findFaceVectorWithinObjects(focusedObjectFaceDescription, faceDescriptionVector);
+				new_focused_ID_Index = MF::findFaceVectorWithinObjectsFacenet(focusedObjectFaceDescriptionFacenet, faceDescriptionVectorFacenet);
 
 				// temporary when face_recognition is not working
-				if( !(objects.objects.size() == 0) )
+/*				if( !(objects.objects.size() == 0) )
 				{
 					new_focused_ID_Index = objects.objects[0].label_id;
-				}
+				}*/
 				
 				if(new_focused_ID_Index >= 0)
 				{

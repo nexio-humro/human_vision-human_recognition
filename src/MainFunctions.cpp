@@ -136,6 +136,20 @@ namespace MF
 		}
 	}
 	
+	void saveFaceDescriptions(human_vision_exchange::Objects& objects)
+	{
+		for(size_t i = 0; i < objects.objects.size(); i++)
+		{
+			std::string path = SF::getPathToCurrentDirectory() + "../output/description_" + std::to_string(MF::getCounter()) + "_" + std::to_string(i);
+			std::stringstream keypointsStream;
+			for(size_t j = 0; j < objects.objects[i].keypoint_2d.size(); j++)
+			{
+				keypointsStream<<objects.objects[i].keypoint_2d[j].x<<"\t"<<objects.objects[i].keypoint_2d[j].y<<std::endl;
+			}
+			FM::saveFile(path, keypointsStream.str());
+		}
+	}
+	
 	void saveSceneImage(cv::Mat& sceneImage)
 	{
 		std::cout<<"saveSceneImage()"<<std::endl;
@@ -159,5 +173,111 @@ namespace MF
 		mutexData.lock();
 		counter++;
 		mutexData.unlock();
+	}
+	
+	void getFaceVectorsFacenet(human_vision_exchange::Objects& objects, cv::Mat& photo, std::vector<human_vision_exchange::FaceDescriptionFacenet>& faceVectors)
+	{
+		faceVectors.clear(); 
+		 
+		// cut faces
+		human_vision_exchange::CutFaces cutFaces;
+		cutFaces.request.keypoints.resize(objects.objects.size());
+		for(size_t i = 0; i < objects.objects.size(); i++)
+		{
+			for(size_t j = 0; j < objects.objects[i].keypoint_2d.size(); j++)
+			{
+				cutFaces.request.keypoints[i].points[j] = objects.objects[i].keypoint_2d[j];
+			}
+		}
+				
+		cv_bridge::CvImage cvImage = cv_bridge::CvImage(std_msgs::Header(), "bgr8", photo);	
+		cvImage.toImageMsg(cutFaces.request.image);
+				
+		MD::sendCutFacesClientRequest(cutFaces);
+		
+		std::cout<<"getFaceVectorsFacenet(): objects.objects.size() = "<<objects.objects.size()<<std::endl;
+		std::cout<<"getFaceVectorsFacenet(): faces amount = "<<cutFaces.response.faces.size()<<std::endl;
+		
+		// save images
+		if(true)
+		{
+			MF::saveSceneImage(photo);
+			MF::saveFaceImages(cutFaces.response);
+		}
+		
+		// save 2D keypoints
+		if(true)
+		{
+			MF::saveFaceDescriptions(objects);
+		}
+				
+		if(cutFaces.response.faces.size() > 0)
+		{
+			// find faces vectors
+			human_vision_exchange::FindFaceVectorsFacenet findFaceVectorsFacenet;
+			findFaceVectorsFacenet.request.faces = cutFaces.response.faces;
+					
+			MD::sendFindFaceVectorsFacenetClientRequest(findFaceVectorsFacenet);
+			
+			if(findFaceVectorsFacenet.response.faceVectors.faces.size() > 0)
+			{
+				faceVectors.resize(findFaceVectorsFacenet.response.faceVectors.faces.size());
+				
+				for(size_t i = 0; i < findFaceVectorsFacenet.response.faceVectors.faces.size(); i++)
+				{
+					for(size_t j = 0; j < findFaceVectorsFacenet.response.faceVectors.faces[i].points.size(); j++)
+					{
+						faceVectors.at(0).points[j] = findFaceVectorsFacenet.response.faceVectors.faces[i].points[j];
+					}
+				}
+			}
+		}
+		
+		MF::increaseCounter();
+	}
+	
+	int findFaceVectorWithinObjectsFacenet(human_vision_exchange::FaceDescriptionFacenet& faceDescription, std::vector<human_vision_exchange::FaceDescriptionFacenet>& faceDescriptionVector, double minTreshold)
+	{
+		std::cout<<"findFaceVectorWithinObjectsFacenet(): start"<<std::endl;
+		int best_index = wrongIndexResult;
+		double best_score = wrongScoreResult;
+		
+		for(size_t i = 0; i < faceDescriptionVector.size(); i++)
+		{
+			if(faceDescription.points.size() == faceDescriptionVector.at(i).points.size())
+			{
+				double comparisonResult = MF::lengthBetweenFaceVectors(faceDescription, faceDescriptionVector.at(i));
+				std::cout<<"findFaceVectorWithinObjectsFacenet(): comparisonResult = "<<comparisonResult<<std::endl;
+			
+				if( (comparisonResult < minTreshold) && (comparisonResult < best_score) )
+				{
+					best_index = i;
+					best_score = comparisonResult;
+				}   
+			}
+		}
+		
+		return best_index;
+	}
+	
+	double lengthBetweenFaceVectors(human_vision_exchange::FaceDescriptionFacenet& firstFaceVector, human_vision_exchange::FaceDescriptionFacenet& secondFaceVector)
+	{
+		double result = std::numeric_limits<double>::max();
+		
+		if(firstFaceVector.points.size() == secondFaceVector.points.size())
+		{
+			double sum = 0.0;
+			
+			for(size_t i = 0; i < firstFaceVector.points.size(); i++)
+			{
+				double vectorElementSubstraction = firstFaceVector.points[i] - secondFaceVector.points[i];
+				double substractionPower = std::pow(vectorElementSubstraction, 2); 
+				sum += substractionPower; 
+			}
+			
+			result = std::sqrt(sum);
+		}
+		
+		return result;
 	}
 }

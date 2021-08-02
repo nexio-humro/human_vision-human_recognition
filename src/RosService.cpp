@@ -11,4 +11,15 @@ namespace RS
 		
 		return true;
 	}
+	
+	bool processFaceVectorFacenet(human_vision_exchange::FaceVectorReceiverFacenet::Request  &req, human_vision_exchange::FaceVectorReceiverFacenet::Response &res)
+	{
+		std::cout<<"processFaceVectorFacenet(): start"<<std::endl;
+		MD::setFocusedObjectActivated(true);
+		MD::setFocusedFaceDescriptionFacenet(req.faceDescription);
+		
+		res.status = true;
+		
+		return true;
+	}
 }
