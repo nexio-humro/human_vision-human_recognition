@@ -136,20 +136,6 @@ namespace MF
 		}
 	}
 	
-	void saveKeypoints(human_vision_exchange::Objects& objects)
-	{
-		for(size_t i = 0; i < objects.objects.size(); i++)
-		{
-			std::string path = SF::getPathToCurrentDirectory() + "../output/keypoints_" + std::to_string(MF::getCounter()) + "_" + std::to_string(i);
-			std::stringstream keypointsStream;
-			for(size_t j = 0; j < objects.objects[i].keypoint_2d.size(); j++)
-			{
-				keypointsStream<<objects.objects[i].keypoint_2d[j].x<<"\t"<<objects.objects[i].keypoint_2d[j].y<<std::endl;
-			}
-			FM::saveFile(path, keypointsStream.str());
-		}
-	}
-	
 	void saveSceneImage(cv::Mat& sceneImage)
 	{
 		std::cout<<"saveSceneImage()"<<std::endl;
@@ -233,6 +219,12 @@ namespace MF
 			}
 		}
 		
+		// save faceDescriptions
+		if(true)
+		{
+			MF::saveFaceDescriptions(faceVectors);
+		}
+		
 		MF::increaseCounter();
 	}
 	
@@ -279,5 +271,33 @@ namespace MF
 		}
 		
 		return result;
+	}
+	
+	void saveKeypoints(human_vision_exchange::Objects& objects)
+	{
+		for(size_t i = 0; i < objects.objects.size(); i++)
+		{
+			std::string path = SF::getPathToCurrentDirectory() + "../output/keypoints_" + std::to_string(MF::getCounter()) + "_" + std::to_string(i);
+			std::stringstream keypointsStream;
+			for(size_t j = 0; j < objects.objects[i].keypoint_2d.size(); j++)
+			{
+				keypointsStream<<objects.objects[i].keypoint_2d[j].x<<"\t"<<objects.objects[i].keypoint_2d[j].y<<std::endl;
+			}
+			FM::saveFile(path, keypointsStream.str());
+		}
+	}
+	
+	void saveFaceDescriptions(std::vector<human_vision_exchange::FaceDescriptionFacenet>& faceDescriptionsVector)
+	{
+		for(size_t i = 0; i < faceDescriptionsVector.size(); i++)
+		{
+			std::string path = SF::getPathToCurrentDirectory() + "../output/faceDescription_" + std::to_string(MF::getCounter()) + "_" + std::to_string(i);
+			std::stringstream faceDescriptionStream;
+			for(size_t j = 0; j < faceDescriptionsVector.at(i).points.size(); j++)
+			{
+				faceDescriptionStream<<faceDescriptionsVector.at(i).points[j]<<std::endl;
+			}
+			FM::saveFile(path, faceDescriptionStream.str());
+		}
 	}
 }

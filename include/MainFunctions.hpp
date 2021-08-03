@@ -30,7 +30,6 @@ namespace MF
 	
 	double lengthBetweenFaceVectors(human_vision_exchange::FaceDescription& firstFaceVector, human_vision_exchange::FaceDescription& secondFaceVector);
 	void saveFaceImages(human_vision_exchange::CutFaces::Response &res);
-	void saveKeypoints(human_vision_exchange::Objects& objects);
 	void saveSceneImage(cv::Mat& sceneImage);
 	size_t getCounter();
 	void increaseCounter();
@@ -39,6 +38,8 @@ namespace MF
 	void getFaceVectorsFacenet(human_vision_exchange::Objects& objects, cv::Mat& photo, std::vector<human_vision_exchange::FaceDescriptionFacenet>& faceVectors);
 	int findFaceVectorWithinObjectsFacenet(human_vision_exchange::FaceDescriptionFacenet& faceDescription, std::vector<human_vision_exchange::FaceDescriptionFacenet>& faceDescriptionVector, double minTreshold = 0.6);
 	double lengthBetweenFaceVectors(human_vision_exchange::FaceDescriptionFacenet& firstFaceVector, human_vision_exchange::FaceDescriptionFacenet& secondFaceVector);
+	void saveKeypoints(human_vision_exchange::Objects& objects);
+	void saveFaceDescriptions(std::vector<human_vision_exchange::FaceDescriptionFacenet>& faceDescriptionsVector);
 	
 }
 
