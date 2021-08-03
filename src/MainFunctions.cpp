@@ -54,7 +54,7 @@ namespace MF
 				{
 					for(size_t j = 0; j < findFaceVectors.response.faceVectors.faces[i].points.size(); j++)
 					{
-						faceVectors.at(0).points[j] = findFaceVectors.response.faceVectors.faces[i].points[j];
+						faceVectors.at(i).points[j] = findFaceVectors.response.faceVectors.faces[i].points[j];
 					}
 				}
 			}
@@ -227,7 +227,7 @@ namespace MF
 				{
 					for(size_t j = 0; j < findFaceVectorsFacenet.response.faceVectors.faces[i].points.size(); j++)
 					{
-						faceVectors.at(0).points[j] = findFaceVectorsFacenet.response.faceVectors.faces[i].points[j];
+						faceVectors.at(i).points[j] = findFaceVectorsFacenet.response.faceVectors.faces[i].points[j];
 					}
 				}
 			}
