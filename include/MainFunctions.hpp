@@ -30,7 +30,7 @@ namespace MF
 	
 	double lengthBetweenFaceVectors(human_vision_exchange::FaceDescription& firstFaceVector, human_vision_exchange::FaceDescription& secondFaceVector);
 	void saveFaceImages(human_vision_exchange::CutFaces::Response &res);
-	void saveFaceDescriptions(human_vision_exchange::Objects& objects);
+	void saveKeypoints(human_vision_exchange::Objects& objects);
 	void saveSceneImage(cv::Mat& sceneImage);
 	size_t getCounter();
 	void increaseCounter();

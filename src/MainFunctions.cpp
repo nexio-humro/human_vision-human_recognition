@@ -136,11 +136,11 @@ namespace MF
 		}
 	}
 	
-	void saveFaceDescriptions(human_vision_exchange::Objects& objects)
+	void saveKeypoints(human_vision_exchange::Objects& objects)
 	{
 		for(size_t i = 0; i < objects.objects.size(); i++)
 		{
-			std::string path = SF::getPathToCurrentDirectory() + "../output/description_" + std::to_string(MF::getCounter()) + "_" + std::to_string(i);
+			std::string path = SF::getPathToCurrentDirectory() + "../output/keypoints_" + std::to_string(MF::getCounter()) + "_" + std::to_string(i);
 			std::stringstream keypointsStream;
 			for(size_t j = 0; j < objects.objects[i].keypoint_2d.size(); j++)
 			{
@@ -208,7 +208,7 @@ namespace MF
 		// save 2D keypoints
 		if(true)
 		{
-			MF::saveFaceDescriptions(objects);
+			MF::saveKeypoints(objects);
 		}
 				
 		if(cutFaces.response.faces.size() > 0)
