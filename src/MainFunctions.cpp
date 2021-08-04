@@ -133,6 +133,9 @@ namespace MF
 //			cv_bridge::CvImagePtr cv_ptr = cv_bridge::toCvCopy(res.faces[i], sensor_msgs::image_encodings::BGR8);
 			cv_bridge::CvImagePtr cv_ptr = cv_bridge::toCvCopy(res.faces[i], sensor_msgs::image_encodings::RGB8);
 			cv::Mat cvImage = cv_ptr->image;
+			
+			// swap faceImage channels imwrtie needs cm::mat in BGR
+			cv::cvtColor(cvImage, cvImage, cv::COLOR_RGB2BGR);
 			cv::imwrite(path, cvImage);
 		}
 	}
