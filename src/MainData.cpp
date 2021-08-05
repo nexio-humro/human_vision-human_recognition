@@ -61,6 +61,7 @@ namespace MD
 	void setFocusedObjectID(const int newID)
 	{
 		_mutex.lock();
+		std::cout<<"MD::setFocusedObjectID()"<<std::endl;
 		focusedObjectID = newID;
 		_mutex.unlock();
 	}
