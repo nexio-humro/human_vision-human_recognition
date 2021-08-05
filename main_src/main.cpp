@@ -91,6 +91,7 @@ int main(int argc, char **argv)
 				if(new_focused_ID_Index >= 0)
 				{
 					// change tracking object ID
+					std::cout<<"setFocusedObjectID: new_focused_ID_Index = "<<new_focused_ID_Index<<", itteration = "<<MF::getCounter()<<std::endl;
 					MD::setFocusedObjectID(new_focused_ID_Index);
 				} 
 			}	
