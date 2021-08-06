@@ -81,7 +81,7 @@ int main(int argc, char **argv)
 				
 				int new_focused_ID_Index = -1;
 //				new_focused_ID_Index = MF::findFaceVectorWithinObjects(focusedObjectFaceDescription, faceDescriptionVector);
-				new_focused_ID_Index = MF::findFaceVectorWithinObjectsFacenet(focusedObjectFaceDescriptionFacenet, faceDescriptionVectorFacenet);
+				new_focused_ID_Index = MF::findFaceVectorWithinObjectsFacenet(focusedObjectFaceDescriptionFacenet, faceDescriptionVectorFacenet, 0.9);
 
 				// temporary when face_recognition is not working
 /*				if( !(objects.objects.size() == 0) )
