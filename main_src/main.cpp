@@ -34,6 +34,7 @@ int main(int argc, char **argv)
 //		human_vision_exchange::FaceDescription focusedObjectFaceDescription = MD::getFocusedFaceDescription();
 		human_vision_exchange::FaceDescriptionFacenet focusedObjectFaceDescriptionFacenet = MD::getFocusedFaceDescriptionFacenet();
 		
+		std::cout<<"main(): focusedObjectID = "<<focusedObjectID<<std::endl;
 //		std::cout<<"counter = "<<MF::getCounter()<<std::endl;
 		
 		// check if tracking object is activated
