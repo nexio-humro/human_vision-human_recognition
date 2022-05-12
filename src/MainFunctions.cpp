@@ -59,7 +59,7 @@ namespace MF
 				}
 			}
 		}
-		
+
 		MF::increaseCounter();
 	}
 	 
@@ -146,6 +146,11 @@ namespace MF
 		std::string pathImage = SF::getPathToCurrentDirectory() + "../output/image_" + std::to_string(MF::getCounter()) + ".png";
 		cv::imwrite (pathImage.c_str(), sceneImage);
 	}
+
+	void removeImages()
+	{
+		std::filesystem::remove_all(SF::getPathToCurrentDirectory() + "../output/");
+	}
 	
 	size_t getCounter()
 	{
@@ -228,6 +233,8 @@ namespace MF
 		{
 			MF::saveFaceDescriptions(faceVectors);
 		}
+
+		MF::removeImages();
 		
 		MF::increaseCounter();
 	}

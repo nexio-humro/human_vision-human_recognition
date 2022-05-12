@@ -2,6 +2,7 @@
 #define MAIN_FUNCTIONS_HPP
 
 #include <iostream>
+#include <filesystem>
 #include <mutex>
 
 #include "ros/ros.h"
